@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Facility Digital Twin — Phase 1</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #0a0a0c;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        #renderCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            outline: none;
+            touch-action: none;
+        }
+        #loadingOverlay {
+            position: fixed;
+            inset: 0;
+            background: #0a0a0c;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.6s ease;
+        }
+        #loadingOverlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .loading-title {
+            color: #4af;
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(68, 170, 255, 0.2);
+            border-top-color: #4af;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 12px;
+        }
+        .loading-sub {
+            color: #666;
+            font-size: 13px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading overlay -->
+    <div id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-title">Facility Digital Twin</div>
+        <div class="loading-sub">Initializing 3D environment…</div>
+    </div>
+
+    <!-- Babylon.js render target -->
+    <canvas id="renderCanvas"></canvas>
+
+    <!-- Babylon.js CDN -->
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+
+    <!-- Application -->
+    <script type="module">
+        import { createScene } from "./systems/scene.js";
+        import { buildFacility } from "./systems/floor.js";
+        import { setupEquipment } from "./systems/equipment.js";
+        import { createPathFollowers } from "./systems/pathFollower.js";
+        import { buildGUI } from "./systems/gui.js";
+
+        async function main() {
+            const layoutResp = await fetch("./data/layout.json");
+            const layout = await layoutResp.json();
+
+            const canvas = document.getElementById("renderCanvas");
+            const engine = new BABYLON.Engine(canvas, true, {
+                preserveDrawingBuffer: true,
+                stencil: true,
+            });
+
+            // 1. Scene (cameras, lighting, environment)
+            const scene = createScene(engine, canvas, layout.facility);
+
+            // 2. Facility shell
+            buildFacility(scene, layout.facility);
+
+            // 3. Equipment placement
+            const equipmentSystem = setupEquipment(scene, layout.equipment);
+
+            // 4. Animated path followers
+            const pathFollowers = createPathFollowers(
+                scene,
+                layout.paths,
+                layout.simulation
+            );
+
+            // 5. GUI overlay
+            buildGUI(scene, equipmentSystem, pathFollowers);
+
+            // Dismiss loading overlay
+            const overlay = document.getElementById("loadingOverlay");
+            overlay.classList.add("hidden");
+            setTimeout(() => overlay.remove(), 700);
+
+            // Render loop
+            engine.runRenderLoop(() => scene.render());
+            window.addEventListener("resize", () => engine.resize());
+
+            console.log("[App] Facility Digital Twin — Phase 1 ready.");
+        }
+
+        main().catch((err) => {
+            console.error("[App] Fatal error:", err);
+            const overlay = document.getElementById("loadingOverlay");
+            overlay.innerHTML = `
+                <div style="color:#f44;font-size:18px;padding:40px;text-align:center;">
+                    Error: ${err.message}<br><br>
+                    <small style="color:#888;">Check the browser console for details.</small>
+                </div>`;
+        });
+    </script>
+</body>
+</html>
