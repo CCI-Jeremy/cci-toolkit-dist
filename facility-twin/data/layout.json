@@ -1,0 +1,30 @@
+{
+  "facility": {
+    "width": 60,
+    "depth": 40,
+    "height": 8
+  },
+  "equipment": [
+    { "id": "cnc-1", "label": "CNC Machine 1", "model": "kenney-industrial/machine_a.glb", "position": [8, 0, 8], "rotation": 0, "scale": 1.5 },
+    { "id": "cnc-2", "label": "CNC Machine 2", "model": "kenney-industrial/machine_a.glb", "position": [8, 0, 16], "rotation": 0, "scale": 1.5 },
+    { "id": "conveyor-1", "label": "Conveyor Line", "model": "kenney-industrial/conveyor.glb", "position": [20, 0, 12], "rotation": 90, "scale": 2.0 },
+    { "id": "rack-1", "label": "Storage Rack A", "model": "kenney-industrial/shelf_a.glb", "position": [45, 0, 8], "rotation": 0, "scale": 2.0 },
+    { "id": "rack-2", "label": "Storage Rack B", "model": "kenney-industrial/shelf_a.glb", "position": [45, 0, 16], "rotation": 0, "scale": 2.0 },
+    { "id": "rack-3", "label": "Storage Rack C", "model": "kenney-industrial/shelf_a.glb", "position": [45, 0, 24], "rotation": 0, "scale": 2.0 },
+    { "id": "workbench-1", "label": "Assembly Station 1", "model": "kenney-industrial/table_a.glb", "position": [30, 0, 8], "rotation": 0, "scale": 1.5 },
+    { "id": "workbench-2", "label": "Assembly Station 2", "model": "kenney-industrial/table_a.glb", "position": [30, 0, 16], "rotation": 0, "scale": 1.5 }
+  ],
+  "paths": {
+    "forklift": [
+      [5, 0, 35], [50, 0, 35], [50, 0, 5], [5, 0, 5], [5, 0, 35]
+    ],
+    "worker": [
+      [8, 0, 8], [30, 0, 8], [30, 0, 16], [8, 0, 16], [8, 0, 8]
+    ]
+  },
+  "simulation": {
+    "forkliftSpeed": 3.0,
+    "workerSpeed": 1.2,
+    "workerPauseTime": 2.0
+  }
+}
